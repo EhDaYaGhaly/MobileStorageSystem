@@ -2,9 +2,9 @@
 import { NavigationContainer ,NavigationIndependentTree} from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import { ProductStack } from './stacks/ProductStack';
 import { ScannerStack } from './stacks/ScannerStack';
+import {CashierStack} from './stacks/CashierStack'
 import { Provider as PaperProvider } from 'react-native-paper';
 import { theme } from './styles/theme';
 const Tab = createBottomTabNavigator();
@@ -13,9 +13,7 @@ export default function RootLayout() {
   return (
     <PaperProvider theme={theme}>
       <NavigationIndependentTree>
-
       <NavigationContainer linking={undefined}>
-
           <Tab.Navigator
             screenOptions={({ route }) => ({
               tabBarIcon: ({ focused, color, size }) => {
@@ -34,8 +32,9 @@ export default function RootLayout() {
               headerShown: false,
             })}
             >
-            <Tab.Screen name="Inventory" component={ProductStack} />
-            <Tab.Screen name="Scanner" component={ScannerStack} />
+          <Tab.Screen name="Inventory" component={ProductStack} />
+        <Tab.Screen name="Scanner" component={ScannerStack} />
+        <Tab.Screen name="Cashier" component={CashierStack} />
           </Tab.Navigator>
               </NavigationContainer>
               </NavigationIndependentTree>
