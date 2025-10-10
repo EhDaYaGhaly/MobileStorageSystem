@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "app/stacks/ProductStack.jsx", "app/stacks/ScannerStack.jsx"  ]
 }
