@@ -14,6 +14,7 @@ import {
   Title,
   HelperText,
   Divider,
+  Text,
 } from 'react-native-paper';
 import { Product } from '../models/Product';
 import { StorageService } from '../utils/storage';
@@ -38,7 +39,7 @@ export default function AddEditProductScreen({ route, navigation }) {
 
   useEffect(() => {
     if (scannedBarcode && !isEditing) {
-      // Check if product with this barcode already exists
+  
       checkExistingBarcode(scannedBarcode);
     }
   }, [scannedBarcode, isEditing]);
@@ -68,7 +69,7 @@ export default function AddEditProductScreen({ route, navigation }) {
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
+  
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
     }
@@ -99,7 +100,7 @@ export default function AddEditProductScreen({ route, navigation }) {
       let productToSave;
       
       if (isEditing) {
-        // Update existing product
+ 
         productToSave = new Product(
           product.id,
           formData.name.trim(),
@@ -109,9 +110,11 @@ export default function AddEditProductScreen({ route, navigation }) {
           formData.description.trim(),
           formData.category.trim()
         );
-        productToSave.createdAt = product.createdAt; // Preserve original creation date
+    
+        productToSave.createdAt = product.createdAt;
+        productToSave.updatedAt = new Date().toISOString();
       } else {
-        // Create new product
+       
         productToSave = new Product(
           null,
           formData.name.trim(),
@@ -135,7 +138,8 @@ export default function AddEditProductScreen({ route, navigation }) {
         Alert.alert('Error', `Failed to ${isEditing ? 'update' : 'add'} product`);
       }
     } catch (error) {
-      Alert.alert('Error', `Failed to ${isEditing ? 'update' : 'add'} product`);
+      console.error('Error saving product:', error);
+      Alert.alert('Error', `Failed to ${isEditing ? 'update' : 'add'} product: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -153,9 +157,9 @@ export default function AddEditProductScreen({ route, navigation }) {
       <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
         <Card style={styles.card}>
           <Card.Content>
-            <Title style={styles.title}>
+            <Text variant="titleLarge" style={styles.title}>
               {isEditing ? 'Edit Product' : 'Add New Product'}
-            </Title>
+            </Text>
 
             <TextInput
               label="Product Name *"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,9 +15,7 @@ import {
 } from 'react-native-paper';
 import { StorageService } from '../utils/storage';
 import { theme, spacing } from '../styles/theme';
-import { Camera , CameraView } from 'expo-camera';
-
-
+import { Camera, CameraView } from 'expo-camera';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,10 +26,14 @@ export default function ScannerScreen({ navigation }) {
   const [productDialogVisible, setProductDialogVisible] = useState(false);
   const [foundProduct, setFoundProduct] = useState(null);
   const [lastScannedBarcode, setLastScannedBarcode] = useState('');
+  const [processing, setProcessing] = useState(false);
+  
+  const processingRef = useRef(false);
+  const lastScanTimeRef = useRef(0);
 
   useEffect(() => {
     const getBarCodeScannerPermissions = async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     };
 
@@ -39,26 +41,46 @@ export default function ScannerScreen({ navigation }) {
   }, []);
 
   const handleBarCodeScanned = async ({ type, data }) => {
-    if (scanned) return;
-    
+    const currentTime = Date.now();
+    if (
+      processingRef.current || 
+      scanned || 
+      (lastScanTimeRef.current && currentTime - lastScanTimeRef.current < 2000 && lastScannedBarcode === data)
+    ) {
+      return;
+    }
+
+    processingRef.current = true;
+    setProcessing(true);
     setScanned(true);
     setScanning(false);
     setLastScannedBarcode(data);
+    lastScanTimeRef.current = currentTime;
 
     try {
-      // Check if product exists with this barcode
+   
       const existingProduct = await StorageService.getProductByBarcode(data);
       
       if (existingProduct) {
         setFoundProduct(existingProduct);
         setProductDialogVisible(true);
+      
+        processingRef.current = false;
+        setProcessing(false);
       } else {
-        // No existing product, offer to create new one
+    
+        processingRef.current = false;
+        setProcessing(false);
+        
         Alert.alert(
           'Barcode Scanned',
           `Barcode: ${data}\n\nNo product found with this barcode. Would you like to add a new product?`,
           [
-            { text: 'Scan Again', onPress: resetScanner },
+            { 
+              text: 'Scan Again', 
+              onPress: resetScanner,
+              style: 'cancel'
+            },
             {
               text: 'Add Product',
               onPress: () => {
@@ -66,21 +88,35 @@ export default function ScannerScreen({ navigation }) {
                 resetScanner();
               },
             },
-          ]
+          ],
+          { 
+            cancelable: false // Prevent dismissing by tapping outside
+          }
         );
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to lookup product');
-      resetScanner();
+      console.error('Error looking up product:', error);
+      processingRef.current = false;
+      setProcessing(false);
+      Alert.alert(
+        'Error', 
+        'Failed to lookup product',
+        [{ text: 'OK', onPress: resetScanner }],
+        { cancelable: false }
+      );
     }
   };
 
   const resetScanner = () => {
+
     setScanned(false);
     setScanning(true);
     setFoundProduct(null);
     setProductDialogVisible(false);
     setLastScannedBarcode('');
+    setProcessing(false);
+    processingRef.current = false;
+    lastScanTimeRef.current = 0;
   };
 
   const handleViewProduct = () => {
@@ -92,6 +128,11 @@ export default function ScannerScreen({ navigation }) {
   const handleEditProduct = () => {
     setProductDialogVisible(false);
     navigation.navigate('AddEditProduct', { product: foundProduct });
+    resetScanner();
+  };
+
+  const handleDialogDismiss = () => {
+    setProductDialogVisible(false);
     resetScanner();
   };
 
@@ -109,7 +150,7 @@ export default function ScannerScreen({ navigation }) {
         <Card style={styles.permissionCard}>
           <Card.Content>
             <Text style={styles.permissionTitle}>Camera Permission Required</Text>
-           <Text variant="bodyMedium" style={styles.permissionText}>
+            <Text variant="bodyMedium" style={styles.permissionText}>
               This app needs camera access to scan barcodes. Please grant camera permission in your device settings.
             </Text>
             <Button
@@ -129,20 +170,28 @@ export default function ScannerScreen({ navigation }) {
     <View style={styles.container}>
       {scanning && (
         <CameraView
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+   
+          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        
+          autofocus='on'
+          selectedLens='Back Ultra Wide Camera'
           style={styles.scanner}
+          barcodeScannerSettings={{
+            barcodeTypes: ['code128', 'qr', 'ean13', 'ean8', 'upc_a', 'upc_e'],
+          }}
+          facing="back"
         />
       )}
       
       <View style={styles.overlay}>
         <View style={styles.topOverlay}>
           <Text style={styles.instructionText}>
-            Point your camera at a barcode
+            {processing ? 'Processing...' : 'Point your camera at a barcode'}
           </Text>
         </View>
         
         <View style={styles.scanArea}>
-          <View style={styles.scanFrame} />
+          <View style={[styles.scanFrame, processing && styles.processingFrame]} />
         </View>
         
         <View style={styles.bottomOverlay}>
@@ -156,7 +205,7 @@ export default function ScannerScreen({ navigation }) {
             mode="contained"
             onPress={resetScanner}
             style={styles.resetButton}
-            disabled={scanning && !scanned}
+            disabled={processing}
           >
             {scanned ? 'Scan Again' : 'Reset Scanner'}
           </Button>
@@ -166,7 +215,8 @@ export default function ScannerScreen({ navigation }) {
       <Portal>
         <Dialog
           visible={productDialogVisible}
-          onDismiss={() => setProductDialogVisible(false)}
+          onDismiss={handleDialogDismiss}
+          dismissable={!processing}
         >
           <Dialog.Title>Product Found!</Dialog.Title>
           <Dialog.Content>
@@ -185,7 +235,7 @@ export default function ScannerScreen({ navigation }) {
                   </Chip>
                 </View>
                 {foundProduct.description && (
-                  <Text variant='bodyMedium' style={styles.productDescription}>
+                  <Text variant="bodyMedium" style={styles.productDescription}>
                     {foundProduct.description}
                   </Text>
                 )}
@@ -196,7 +246,7 @@ export default function ScannerScreen({ navigation }) {
             )}
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setProductDialogVisible(false)}>
+            <Button onPress={handleDialogDismiss}>
               Cancel
             </Button>
             <Button onPress={handleEditProduct}>
@@ -260,6 +310,9 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.primary,
     backgroundColor: 'transparent',
     borderRadius: 10,
+  },
+  processingFrame: {
+    borderColor: '#FFA500', 
   },
   bottomOverlay: {
     flex: 1,

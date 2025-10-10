@@ -163,7 +163,7 @@ export default function ProductListScreen({ navigation }) {
     >
       <Card.Content>
         <Title>{item.name}</Title>
-        <Text variant='bodyMedium' numberOfLines={2}>{item.description || 'No description'}</Text>
+        <Paragraph numberOfLines={2}>{item.description || 'No description'}</Paragraph>
         <View style={styles.productInfo}>
           <Chip mode="outlined" style={styles.chip}>
             ${item.price.toFixed(2)}
@@ -178,7 +178,7 @@ export default function ProductListScreen({ navigation }) {
           )}
         </View>
         {item.barcode && (
-          <Text variant='bodyMedium' style={styles.barcode}>Barcode: {item.barcode}</Text>
+          <Paragraph style={styles.barcode}>Barcode: {item.barcode}</Paragraph>
         )}
       </Card.Content>
     </Card>

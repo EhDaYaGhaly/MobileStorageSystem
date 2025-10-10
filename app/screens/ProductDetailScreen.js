@@ -92,7 +92,7 @@ export default function ProductDetailScreen({ route, navigation }) {
           {product.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Description</Text>
-              <Text variant='bodyMedium' style={styles.description}>{product.description}</Text>
+              <Paragraph style={styles.description}>{product.description}</Paragraph>
             </View>
           )}
 
