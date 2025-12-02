@@ -1,26 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { Camera, CameraView } from 'expo-camera';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  FlatList,
-  StyleSheet,
   Alert,
   Dimensions,
+  FlatList,
+  StyleSheet,
+  View,
 } from 'react-native';
 import {
-  Text,
   Button,
   Card,
-  Portal,
   Dialog,
-  Chip,
   Divider,
   IconButton,
+  Portal,
   Surface,
-  TextInput,
+  Text,
+  TextInput
 } from 'react-native-paper';
+import { spacing, theme } from '../styles/theme';
 import { StorageService } from '../utils/storage';
-import { theme, spacing } from '../styles/theme';
-import { Camera, CameraView } from 'expo-camera';
 
 const { width, height } = Dimensions.get('window');
 
@@ -207,11 +206,10 @@ export default function CashierScreen({ navigation }) {
 
     try {
       for (const cartItem of cart) {
-        const product = await StorageService.getProductById(cartItem.id);
+        const product = await StorageService.getProductByBarcode(cartItem.barcode);
         if (product) {
-          const newQuantity = product.quantity - cartItem.quantity;
-          const updatedProduct = { ...product, quantity: newQuantity };
-          await StorageService.saveProduct(updatedProduct);
+          product.updateQuantity(product.quantity - cartItem.quantity);
+          await StorageService.saveProduct(product);
         }
       }
       setCart([]);
