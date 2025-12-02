@@ -19,6 +19,16 @@ A complete mobile storage management application with barcode scanning capabilit
 - Real-time barcode scanning with camera preview
 - Automatic product lookup by barcode
 
+### 💰 **Cashier & Point of Sale**
+- Scan products to add them to shopping cart
+- Manual barcode entry for damaged or unreadable barcodes
+- Adjust item quantities directly in cart
+- Real-time cart total calculation
+- Stock availability checking before adding to cart
+- Checkout with automatic inventory deduction
+- Clear cart functionality with confirmation
+- Out of stock and insufficient stock alerts
+
 ### 🎨 **User Interface Features**
 - Clean, intuitive mobile-first design
 - Product list view with search capabilities
