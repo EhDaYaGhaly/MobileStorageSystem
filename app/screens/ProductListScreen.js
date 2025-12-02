@@ -10,8 +10,6 @@ import {
   Searchbar,
   FAB,
   Card,
-  Title,
-  Paragraph,
   Chip,
   Menu,
   Divider,
@@ -162,8 +160,8 @@ export default function ProductListScreen({ navigation }) {
       onPress={() => navigation.navigate('ProductDetail', { product: item })}
     >
       <Card.Content>
-        <Title>{item.name}</Title>
-        <Paragraph numberOfLines={2}>{item.description || 'No description'}</Paragraph>
+        <Text variant='titleLarge'>{item.name}</Text>
+        <Text variant='bodyMedium' numberOfLines={2}>{item.description || 'No description'}</Text>
         <View style={styles.productInfo}>
           <Chip mode="outlined" style={styles.chip}>
             ${item.price.toFixed(2)}
@@ -178,7 +176,7 @@ export default function ProductListScreen({ navigation }) {
           )}
         </View>
         {item.barcode && (
-          <Paragraph style={styles.barcode}>Barcode: {item.barcode}</Paragraph>
+          <Text variant='bodyMedium' style={styles.barcode}>Barcode: {item.barcode}</Text>
         )}
       </Card.Content>
     </Card>

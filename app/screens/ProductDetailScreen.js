@@ -7,8 +7,6 @@ import {
 } from 'react-native';
 import {
   Card,
-  Title,
-  Paragraph,
   Button,
   Chip,
   Divider,
@@ -61,7 +59,7 @@ export default function ProductDetailScreen({ route, navigation }) {
     <ScrollView style={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-          <Title style={styles.title}>{product.name}</Title>
+          <Text variant='titleLarge' style={styles.title}>{product.name}</Text>
           
           <View style={styles.priceQuantityRow}>
             <Chip mode="outlined" style={styles.priceChip}>
@@ -92,7 +90,7 @@ export default function ProductDetailScreen({ route, navigation }) {
           {product.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Description</Text>
-              <Paragraph style={styles.description}>{product.description}</Paragraph>
+              <Text variant='bodyMedium' style={styles.description}>{product.description}</Text>
             </View>
           )}
 

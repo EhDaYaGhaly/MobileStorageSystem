@@ -9,7 +9,6 @@ import {
   TextInput,
   Button,
   Card,
-  Title,
   Text,
   HelperText,
   Divider,
@@ -83,7 +82,7 @@ export default function ImportDataScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-          <Title style={styles.title}>Import Inventory Data</Title>
+          <Text variant='titleLarge' style={styles.title}>Import Inventory Data</Text>
           
           <Text style={styles.description}>
             Paste your exported JSON data below to restore your inventory. 
